@@ -1,4 +1,4 @@
-const CACHE_NAME = 'helvetesuka-cache-v1';
+const CACHE_NAME = 'helvetesuka-cache-v2';
 const ASSETS = [
   'index.html',
   'index.css',
@@ -38,32 +38,37 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch event - cache-first strategy
+// Fetch event - network-first strategy (fallback to cache)
 self.addEventListener('fetch', (event) => {
+  // Only handle GET requests for caching
+  if (event.request.method !== 'GET') return;
+
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      
-      return fetch(event.request).then((networkResponse) => {
-        // If valid, return response
-        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
-          // Optional: dynamically cache new requests
+    fetch(event.request)
+      .then((networkResponse) => {
+        // If response is valid, cache it and return
+        if (networkResponse && networkResponse.status === 200) {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseToCache);
           });
         }
         return networkResponse;
-      }).catch(() => {
-        // Fail gracefully offline if resource is not cached
-        return new Response('Du er offline, og denne ressursen er ikke tilgjengelig.', {
-          status: 503,
-          statusText: 'Service Unavailable',
-          headers: new Headers({ 'Content-Type': 'text/plain; charset=UTF-8' })
+      })
+      .catch(() => {
+        // Offline: try to return cached resource
+        return caches.match(event.request).then((cachedResponse) => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          
+          return new Response('Du er offline, og denne ressursen er ikke tilgjengelig.', {
+            status: 503,
+            statusText: 'Service Unavailable',
+            headers: new Headers({ 'Content-Type': 'text/plain; charset=UTF-8' })
+          });
         });
-      });
-    })
+      })
   );
 });
+
