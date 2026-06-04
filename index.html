@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Helvetesuka - Gjennomfør Bertrand Larsens ekstremuke</title>
+    
+    <!-- Meta for dark mode & theme styling -->
+    <meta name="color-scheme" content="light dark">
+    <script>
+        {
+            const colorScheme = localStorage.getItem("color-scheme");
+            if (colorScheme) {
+                document.querySelector('meta[name="color-scheme"]').content = colorScheme;
+                document.documentElement.setAttribute('data-theme', colorScheme);
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+    <!-- Onboarding / Setup Screen -->
+    <div id="onboarding-screen" class="screen active">
+        <div class="glass-container onboarding-card">
+            <div class="logo-container">
+                <i class="fa-solid fa-fire-flame-curved logo-icon"></i>
+                <h1>HELVETESUKA</h1>
+                <p class="subtitle">Bli den beste versjonen av deg selv på syv dager</p>
+            </div>
+            
+            <div class="intro-text">
+                <p><strong>Erik Bertrand Larsens «Helvetesuka»</strong> er en ekstremuke utviklet for å teste grensene dine, bygge varige gode vaner, og bevise for deg selv hvor mye du faktisk kan utrette.</p>
+                <p>Dette verktøyet hjelper deg med å planlegge, gjennomføre og reflektere over uken din – <strong>selv mens du er i full, vanlig jobb.</strong></p>
+            </div>
+
+            <div class="rules-summary">
+                <h3>De 7 Grunnsure Reglene:</h3>
+                <ul>
+                    <li><i class="fa-solid fa-check text-accent"></i> Opp klokken <strong>05:00</strong>, i seng klokken <strong>22:00</strong> (unntatt torsdag!)</li>
+                    <li><i class="fa-solid fa-check text-accent"></i> Minst <strong>1 time trening</strong> hver morgen (hard sirkeltrening tirsdag & torsdag)</li>
+                    <li><i class="fa-solid fa-check text-accent"></i> Spis <strong>100% sunt</strong>. Ingen godteri, fastfood eller alkohol.</li>
+                    <li><i class="fa-solid fa-check text-accent"></i> Vær <strong>100% påskrudd</strong>, fokusert og profesjonell på jobb.</li>
+                    <li><i class="fa-solid fa-check text-accent"></i> <strong>Logg helt av</strong> TV, Netflix og sosiale medier (privat skjermtid).</li>
+                    <li><i class="fa-solid fa-check text-accent"></i> Vær bevisst på <strong>modus, vaner, indre dialog</strong> og <strong>aktiv hvile</strong>.</li>
+                    <li><i class="fa-solid fa-check text-accent"></i> Torsdag kveld skal du <strong>døgne</strong> (arbeide gjennom hele natten til fredag kveld).</li>
+                </ul>
+            </div>
+
+            <form id="setup-form" onsubmit="event.preventDefault(); startHelvetesuka();">
+                <div class="form-group">
+                    <label for="start-date-input">Når starter din Helvetesuke?</label>
+                    <p class="input-tip">Det anbefales sterkt å starte på en mandag for å følge programmet optimalt.</p>
+                    <input type="date" id="start-date-input" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-large">
+                    <i class="fa-solid fa-bolt"></i> Start Min Helvetesuke
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Application Screen -->
+    <div id="app-screen" class="screen">
+        <header class="app-header">
+            <div class="header-logo">
+                <i class="fa-solid fa-fire-flame-curved logo-icon-small"></i>
+                <span class="logo-text">HELVETESUKA</span>
+            </div>
+            
+            <div class="header-controls">
+                <span id="week-progress-badge" class="badge">Ukeaktiv</span>
+                <button id="theme-toggle" class="icon-btn" onclick="toggleColorScheme()" title="Endre fargetema">
+                    <i class="fa-solid fa-circle-half-stroke"></i>
+                </button>
+                <button id="info-btn" class="icon-btn" onclick="openInstructionsModal()" title="Instruksjoner">
+                    <i class="fa-solid fa-circle-info"></i>
+                </button>
+                <button id="reset-btn" class="btn btn-danger-outline btn-small" onclick="confirmReset()" title="Avslutt og slett data">
+                    <i class="fa-solid fa-trash-can"></i> Nullstill
+                </button>
+            </div>
+        </header>
+
+        <div class="app-layout">
+            <!-- Timeline Navigation (Monday - Sunday) -->
+            <nav class="timeline-nav">
+                <div class="timeline-container" style="grid-template-columns: repeat(8, 1fr);">
+                    <button class="nav-day-btn" data-day="0" onclick="setActiveDay(0)">
+                        <span class="day-abbr">PREP</span>
+                        <span class="day-num">Dag 0</span>
+                        <div class="day-status-indicator"></div>
+                    </button>
+                    <button class="nav-day-btn" data-day="1" onclick="setActiveDay(1)">
+                        <span class="day-abbr">MA</span>
+                        <span class="day-num">Dag 1</span>
+                        <div class="day-status-indicator"></div>
+                    </button>
+                    <button class="nav-day-btn" data-day="2" onclick="setActiveDay(2)">
+                        <span class="day-abbr">TI</span>
+                        <span class="day-num">Dag 2</span>
+                        <div class="day-status-indicator"></div>
+                    </button>
+                    <button class="nav-day-btn" data-day="3" onclick="setActiveDay(3)">
+                        <span class="day-abbr">ON</span>
+                        <span class="day-num">Dag 3</span>
+                        <div class="day-status-indicator"></div>
+                    </button>
+                    <button class="nav-day-btn" data-day="4" onclick="setActiveDay(4)">
+                        <span class="day-abbr">TO</span>
+                        <span class="day-num">Dag 4</span>
+                        <div class="day-status-indicator"></div>
+                    </button>
+                    <button class="nav-day-btn" data-day="5" onclick="setActiveDay(5)">
+                        <span class="day-abbr">FR</span>
+                        <span class="day-num">Dag 5</span>
+                        <div class="day-status-indicator"></div>
+                    </button>
+                    <button class="nav-day-btn" data-day="6" onclick="setActiveDay(6)">
+                        <span class="day-abbr">LØ</span>
+                        <span class="day-num">Dag 6</span>
+                        <div class="day-status-indicator"></div>
+                    </button>
+                    <button class="nav-day-btn" data-day="7" onclick="setActiveDay(7)">
+                        <span class="day-abbr">SØ</span>
+                        <span class="day-num">Dag 7</span>
+                        <div class="day-status-indicator"></div>
+                    </button>
+                </div>
+            </nav>
+
+            <main class="main-content">
+                <!-- Day Info Header -->
+                <div class="day-header-card glass-container">
+                    <div class="day-title-area">
+                        <span id="current-date-display" class="date-label">Uke 24, Mandag 12. Sept</span>
+                        <h2 id="current-day-name">Mandag</h2>
+                        <div class="theme-badge">
+                            <i class="fa-solid fa-tags"></i>
+                            Dagens tema: <strong id="current-day-theme">Vaner</strong>
+                        </div>
+                    </div>
+                    <div class="day-progress-area">
+                        <div class="progress-ring-container">
+                            <svg class="progress-ring" width="80" height="80">
+                                <circle class="progress-ring__circle-bg" stroke="rgba(255,255,255,0.05)" stroke-width="6" fill="transparent" r="32" cx="40" cy="40"/>
+                                <circle id="day-progress-circle" class="progress-ring__circle" stroke="var(--neon-accent)" stroke-width="6" fill="transparent" r="32" cx="40" cy="40"/>
+                            </svg>
+                            <span id="day-progress-percent" class="progress-percent">0%</span>
+                        </div>
+                        <div class="progress-labels">
+                            <span>Dagens progresjon</span>
+                            <span id="completed-count-label" class="sub-label">0 av 10 fullført</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content Grid -->
+                <div class="content-grid">
+                    <!-- Column 1: Daily Rules & Habits Tracker -->
+                    <div class="grid-column">
+                        <!-- Daily Checklist -->
+                        <section class="glass-container section-card">
+                            <div class="section-title">
+                                <i class="fa-solid fa-list-check title-icon"></i>
+                                <h3>De Faste Reglene</h3>
+                            </div>
+                            <div class="checklist-container">
+                                <label class="checklist-item" id="rule-item-wake">
+                                    <input type="checkbox" id="rule-wake" onchange="toggleRule('wake')">
+                                    <span class="checkbox-custom"><i class="fa-solid fa-check"></i></span>
+                                    <span class="item-text">Stå opp presis klokken <strong>05:00</strong></span>
+                                </label>
+                                <label class="checklist-item" id="rule-item-sleep">
+                                    <input type="checkbox" id="rule-sleep" onchange="toggleRule('sleep')">
+                                    <span class="checkbox-custom"><i class="fa-solid fa-check"></i></span>
+                                    <span class="item-text">Legge seg presis klokken <strong>22:00</strong></span>
+                                </label>
+                                <label class="checklist-item" id="rule-item-exercise">
+                                    <input type="checkbox" id="rule-exercise" onchange="toggleRule('exercise')">
+                                    <span class="checkbox-custom"><i class="fa-solid fa-check"></i></span>
+                                    <span class="item-text">Gjennomført minst <strong>1 time trening</strong></span>
+                                </label>
+                                <label class="checklist-item" id="rule-item-food">
+                                    <input type="checkbox" id="rule-food" onchange="toggleRule('food')">
+                                    <span class="checkbox-custom"><i class="fa-solid fa-check"></i></span>
+                                    <span class="item-text">Kun spist <strong>sunn mat</strong> (ingen sukker/alkohol)</span>
+                                </label>
+                                <label class="checklist-item" id="rule-item-offline">
+                                    <input type="checkbox" id="rule-offline" onchange="toggleRule('offline')">
+                                    <span class="checkbox-custom"><i class="fa-solid fa-check"></i></span>
+                                    <span class="item-text"><strong>Logget helt av</strong> TV og private sosiale medier</span>
+                                </label>
+                                <label class="checklist-item" id="rule-item-efficiency">
+                                    <input type="checkbox" id="rule-efficiency" onchange="toggleRule('efficiency')">
+                                    <span class="checkbox-custom"><i class="fa-solid fa-check"></i></span>
+                                    <span class="item-text">Vært 100% fokusert og effektiv i arbeidstiden</span>
+                                </label>
+                            </div>
+                        </section>
+
+                        <!-- Daily Journal / Reflections -->
+                        <section class="glass-container section-card">
+                            <div class="section-title">
+                                <i class="fa-solid fa-book-open title-icon"></i>
+                                <h3>Dagens Refleksjon & Dagbok</h3>
+                            </div>
+                            <div class="form-group">
+                                <textarea id="daily-journal" placeholder="Skriv ned dine tanker, utfordringer, seire og erfaringer i dag... (lagres automatisk)" oninput="saveJournal()"></textarea>
+                                <span class="input-saved-indicator"><i class="fa-solid fa-cloud-arrow-up"></i> Lagret lokalt</span>
+                            </div>
+                        </section>
+                    </div>
+
+                    <!-- Column 2: Day-Specific Themes (Dynamic) -->
+                    <div class="grid-column">
+                        <!-- PREP: Preparation Day -->
+                        <section id="module-day-0" class="glass-container section-card theme-module">
+                            <div class="section-title text-accent">
+                                <i class="fa-solid fa-gears title-icon"></i>
+                                <h3>Forberedelsesdag: Gjør deg klar</h3>
+                            </div>
+                            <p class="module-intro">Nøkkelen til en vellykket Helvetesuke ligger i grundige forberedelser. Fullfør disse punktene dagen før oppstart for å unngå unødvendig stress.</p>
+                            
+                            <div class="prep-checklist-container">
+                                <div class="checklist-container">
+                                    <label class="checklist-item" id="prep-item-food">
+                                        <input type="checkbox" id="prep-food" onchange="togglePrepItem('food')">
+                                        <span class="checkbox-custom"><i class="fa-solid fa-check"></i></span>
+                                        <span class="item-text"><strong>Handle inn sunn mat:</strong> Fyll kjøleskapet med grønnsaker, proteiner, nøtter og sunn mat for hele uken.</span>
+                                    </label>
+                                    <label class="checklist-item" id="prep-item-clothes">
+                                        <input type="checkbox" id="prep-clothes" onchange="togglePrepItem('clothes')">
+                                        <span class="checkbox-custom"><i class="fa-solid fa-check"></i></span>
+                                        <span class="item-text"><strong>Klargjøre trenings- og jobbklær:</strong> Vask og legg frem klær for de første dagene slik at du sparer tid om morgenen.</span>
+                                    </label>
+                                    <label class="checklist-item" id="prep-item-social">
+                                        <input type="checkbox" id="prep-social" onchange="togglePrepItem('social')">
+                                        <span class="checkbox-custom"><i class="fa-solid fa-check"></i></span>
+                                        <span class="item-text"><strong>Informere dine nærmeste:</strong> Si fra til familie, venner og kolleger at du legger deg tidlig og har SoMe-detox.</span>
+                                    </label>
+                                    <label class="checklist-item" id="prep-item-alarms">
+                                        <input type="checkbox" id="prep-alarms" onchange="togglePrepItem('alarms')">
+                                        <span class="checkbox-custom"><i class="fa-solid fa-check"></i></span>
+                                        <span class="item-text"><strong>Sette alarmer:</strong> Dobbeltsjekk at alarmen er satt til 05:00 (uten slumring!).</span>
+                                    </label>
+                                    <label class="checklist-item" id="prep-item-workspace">
+                                        <input type="checkbox" id="prep-workspace" onchange="togglePrepItem('workspace')">
+                                        <span class="checkbox-custom"><i class="fa-solid fa-check"></i></span>
+                                        <span class="item-text"><strong>Rydde arbeidsplass & hjem:</strong> Et ryddig fysisk miljø gir bedre mentalt fokus.</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group" style="margin-top:10px;">
+                                <label for="prep-intentions">Dine intensjoner og mål for denne uken:</label>
+                                <textarea id="prep-intentions" placeholder="Hvorfor gjør du dette? Hva ønsker du å oppnå?..." oninput="savePrepIntentions()"></textarea>
+                            </div>
+                        </section>
+
+                        <!-- MONDAY: Habits -->
+                        <section id="module-day-1" class="glass-container section-card theme-module">
+                            <div class="section-title text-accent">
+                                <i class="fa-solid fa-arrow-rotate-left title-icon"></i>
+                                <h3>Mandagstema: Kartlegg Vaner</h3>
+                            </div>
+                            <p class="module-intro">Kartlegg dine uvaner og gode vaner. Bestem deg for hvilke uvaner du skal fjerne omgående, og hvordan du skal erstatte dem.</p>
+                            
+                            <div class="habits-app-container">
+                                <form id="add-habit-form" onsubmit="event.preventDefault(); addNewHabit();" class="input-row">
+                                    <input type="text" id="habit-name" placeholder="F.eks. Sjekke SoMe på senga, sluke maten..." required>
+                                    <select id="habit-type">
+                                        <option value="bad">Uvane (-)</option>
+                                        <option value="good">God vane (+)</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-accent"><i class="fa-solid fa-plus"></i></button>
+                                </form>
+
+                                <div class="habits-list-wrapper">
+                                    <h4>Dine registrerte vaner:</h4>
+                                    <ul id="habits-list" class="interactive-list">
+                                        <!-- Dynamic contents -->
+                                    </ul>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- TUESDAY: Mode & Focus -->
+                        <section id="module-day-2" class="glass-container section-card theme-module">
+                            <div class="section-title text-accent">
+                                <i class="fa-solid fa-brain title-icon"></i>
+                                <h3>Tirsdagstema: Modus & Mentalitet</h3>
+                            </div>
+                            <p class="module-intro">Definer modiene du trenger i løpet av dagen. Velg hvilken modus du er i akkurat nå for å styre oppgavene dine bevisst.</p>
+                            
+                            <div class="mode-tracker-container">
+                                <h4>Klikk for å sette din nåværende modus:</h4>
+                                <div class="mode-buttons-grid">
+                                    <button class="mode-btn" data-mode="Fokusert" onclick="setMentalMode('Fokusert', 'fa-crosshairs')">
+                                        <i class="fa-solid fa-crosshairs"></i> Fokusert
+                                    </button>
+                                    <button class="mode-btn" data-mode="Energisk" onclick="setMentalMode('Energisk', 'fa-bolt')">
+                                        <i class="fa-solid fa-bolt"></i> Energisk
+                                    </button>
+                                    <button class="mode-btn" data-mode="Rolig" onclick="setMentalMode('Rolig', 'fa-wind')">
+                                        <i class="fa-solid fa-wind"></i> Rolig / Tilstede
+                                    </button>
+                                    <button class="mode-btn" data-mode="Lyttende" onclick="setMentalMode('Lyttende', 'fa-ear-listening')">
+                                        <i class="fa-solid fa-ear-listening"></i> Lyttende
+                                    </button>
+                                    <button class="mode-btn" data-mode="Kampmodus" onclick="setMentalMode('Kampmodus', 'fa-shield-halved')">
+                                        <i class="fa-solid fa-shield-halved"></i> Kampmodus
+                                    </button>
+                                    <button class="mode-btn" data-mode="Takknemlig" onclick="setMentalMode('Takknemlig', 'fa-heart')">
+                                        <i class="fa-solid fa-heart"></i> Takknemlig
+                                    </button>
+                                </div>
+
+                                <div id="active-mode-display" class="active-mode-card">
+                                    <div class="active-mode-badge">
+                                        <i class="fa-solid fa-brain"></i> Aktiv modus: <span id="current-mode-name">Ingen valgt</span>
+                                    </div>
+                                    <div class="form-group" style="margin-top:10px;">
+                                        <label for="mode-reflection-input">Hvordan hjelper denne modusen deg nå?</label>
+                                        <input type="text" id="mode-reflection-input" placeholder="Skriv en rask refleksjon..." onchange="saveModeReflection()">
+                                    </div>
+                                </div>
+
+                                <div class="reflections-history-wrapper" style="margin-top:20px;">
+                                    <h4>Dagens modus-logg:</h4>
+                                    <ul id="mode-log-list" class="interactive-list">
+                                        <!-- Dynamic items -->
+                                    </ul>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- WEDNESDAY: Time Management -->
+                        <section id="module-day-3" class="glass-container section-card theme-module">
+                            <div class="section-title text-accent">
+                                <i class="fa-solid fa-calendar-day title-icon"></i>
+                                <h3>Onsdagstema: Time Management</h3>
+                            </div>
+                            <p class="module-intro">Å sette gjøremål inn i tidsrammer sikrer suksess. Fyll ut din timeplan for dagen og sjekk av timene etter hvert som du overholder planen.</p>
+                            
+                            <div class="time-block-container">
+                                <div class="time-grid-wrapper">
+                                    <div class="time-grid-header">
+                                        <span>Tid</span>
+                                        <span>Planlagt Aktivitet</span>
+                                        <span>Status</span>
+                                    </div>
+                                    <div id="time-blocks-list" class="time-blocks-list">
+                                        <!-- Dynamically generated 5:00 to 22:00 blocks -->
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- THURSDAY: Out of Comfort Zone -->
+                        <section id="module-day-4" class="glass-container section-card theme-module comfort-theme">
+                            <div class="section-title text-accent-danger">
+                                <i class="fa-solid fa-triangle-exclamation title-icon-danger animate-pulse"></i>
+                                <h3>Torsdagstema: Døgne-Utfordringen</h3>
+                            </div>
+                            <p class="module-intro">Dette er den tøffeste dagen! Du skal holde deg våken fra torsdag kl. 05:00 til fredag kl. 22:00 (41 timer) og snekre, rydde, eller utføre utsatte arbeidsoppgaver.</p>
+                            
+                            <!-- Comfort log -->
+                            <div class="comfort-tracker">
+                                <div class="all-nighter-timer-card">
+                                    <div class="timer-title">Tid våken siden Torsdag kl 05:00:</div>
+                                    <div id="awake-timer-display" class="timer-countdown">00:00:00</div>
+                                    <div class="timer-target">Mål: 41 timer</div>
+                                </div>
+
+                                <div class="form-group" style="margin-top:20px;">
+                                    <label>Registrer en handling ut av komfortsonen i dag:</label>
+                                    <form id="comfort-action-form" onsubmit="event.preventDefault(); addComfortAction();" class="input-row">
+                                        <input type="text" id="comfort-action-input" placeholder="F.eks. Tok en iskald dusj, tok en vanskelig samtale..." required>
+                                        <button type="submit" class="btn btn-danger"><i class="fa-solid fa-plus"></i></button>
+                                    </form>
+                                </div>
+                                <ul id="comfort-actions-list" class="interactive-list" style="margin-bottom:20px;">
+                                    <!-- Dynamic -->
+                                </ul>
+
+                                <div class="checkpoints-wrapper">
+                                    <h4>Nattlige sjekkpunkter (Krever våken-bekreftelse):</h4>
+                                    <div class="checkpoints-grid">
+                                        <div class="checkpoint-card" id="checkpoint-card-1">
+                                            <span class="time">Kl 23:00</span>
+                                            <button class="btn btn-small btn-primary" onclick="confirmCheckpoint(1)">Sjekk inn</button>
+                                        </div>
+                                        <div class="checkpoint-card" id="checkpoint-card-2">
+                                            <span class="time">Kl 01:00</span>
+                                            <button class="btn btn-small btn-primary" onclick="confirmCheckpoint(2)">Sjekk inn</button>
+                                        </div>
+                                        <div class="checkpoint-card" id="checkpoint-card-3">
+                                            <span class="time">Kl 03:00</span>
+                                            <button class="btn btn-small btn-primary" onclick="confirmCheckpoint(3)">Sjekk inn</button>
+                                        </div>
+                                        <div class="checkpoint-card" id="checkpoint-card-4">
+                                            <span class="time">Kl 05:00</span>
+                                            <button class="btn btn-small btn-primary" onclick="confirmCheckpoint(4)">Sjekk inn</button>
+                                        </div>
+                                    </div>
+                                    <div id="checkpoint-motivation" class="motivation-quote-box">
+                                        <i class="fa-solid fa-quote-left"></i>
+                                        <span id="checkpoint-motivation-text">«Kontraster skaper styrke. Hold ut gjennom natten!»</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- FRIDAY: Rest & Powernap -->
+                        <section id="module-day-5" class="glass-container section-card theme-module">
+                            <div class="section-title text-accent">
+                                <i class="fa-solid fa-bed title-icon"></i>
+                                <h3>Fredagstema: Hvile & Restitusjon</h3>
+                            </div>
+                            <p class="module-intro">Etter å ha vært våken i over 30 timer, er en kort powernap i dag ekstremt viktig. Følg også pusteveiledningen for aktiv, skjermfri hvile.</p>
+                            
+                            <div class="rest-tools-container">
+                                <!-- Powernap Section -->
+                                <div class="powernap-card">
+                                    <h4>Innebygd 20-minutters Powernap-tidsur</h4>
+                                    <div class="powernap-timer-display" id="powernap-display">20:00</div>
+                                    <div class="powernap-buttons">
+                                        <button class="btn btn-primary" id="powernap-start-btn" onclick="togglePowernap()"><i class="fa-solid fa-play"></i> Start</button>
+                                        <button class="btn btn-secondary-outline" id="powernap-test-btn" onclick="triggerTestNap()" title="Hurtigtest (10s)"><i class="fa-solid fa-vial"></i> Test</button>
+                                    </div>
+                                </div>
+
+                                <!-- Breathing Bubble Guide -->
+                                <div class="breathing-guide-card">
+                                    <h4>Aktiv Avspenning: Pusteboble</h4>
+                                    <p class="sub-label" style="text-align: center;">Følg sirkelen: Pust inn når den vokser, hold når den er stor, pust ut når den krymper, hold når den er liten.</p>
+                                    <div class="breathing-bubble-wrapper">
+                                        <div class="breathing-bubble" id="breathing-bubble-el"></div>
+                                        <span class="breathing-text" id="breathing-text-el">Klar</span>
+                                    </div>
+                                    <div class="powernap-buttons">
+                                        <button class="btn btn-secondary" id="breathing-toggle-btn" onclick="toggleBreathingGuide()"><i class="fa-solid fa-play"></i> Start Veiledning</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- SATURDAY: Positive Self-talk -->
+                        <section id="module-day-6" class="glass-container section-card theme-module">
+                            <div class="section-title text-accent">
+                                <i class="fa-solid fa-comments title-icon"></i>
+                                <h3>Lørdagstema: Indre Dialog (Skrytevegg)</h3>
+                            </div>
+                            <p class="module-intro">Hvordan du snakker til deg selv påvirker dine prestasjoner dramatisk. Skriv hemningsløst ned ting du er god på, store eller små suksesser, og positive egenskaper.</p>
+                            
+                            <div class="brag-wall-container">
+                                <form id="add-brag-form" onsubmit="event.preventDefault(); addBragCard();" class="input-row">
+                                    <input type="text" id="brag-input" placeholder="F.eks. Jeg gir aldri opp, jeg er en fantastisk lytter, jeg takler stress..." required>
+                                    <button type="submit" class="btn btn-accent"><i class="fa-solid fa-paper-plane"></i> Legg til</button>
+                                </form>
+
+                                <div class="brag-grid" id="brag-grid-container">
+                                    <!-- Dynamic brag sticky notes -->
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- SUNDAY: Perspective -->
+                        <section id="module-day-7" class="glass-container section-card theme-module">
+                            <div class="section-title text-accent">
+                                <i class="fa-solid fa-circle-check title-icon"></i>
+                                <h3>Søndagstema: Sette livet i perspektiv</h3>
+                            </div>
+                            <p class="module-intro">Velkommen til mållinjen! I dag skal du reflektere over uken din, evaluere din nye hverdagsstandard, og belønne deg selv for den formidable innsatsen.</p>
+                            
+                            <div class="sunday-evaluation-container">
+                                <div class="evaluation-form-card">
+                                    <h4>Ukesevaluering:</h4>
+                                    
+                                    <div class="form-group">
+                                        <label for="eval-takeaway">1. Hva var din største aha-opplevelse denne uken?</label>
+                                        <textarea id="eval-takeaway" placeholder="Skriv her..." onchange="saveSundayEval()"></textarea>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="eval-standard">2. Hvilke nye standarder vil du beholde i din vanlige jobbuke?</label>
+                                        <textarea id="eval-standard" placeholder="F.eks. Alltid legge seg klokken 22:00, morgenrutine med trening..." onchange="saveSundayEval()"></textarea>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="eval-reward">3. Hvordan belønnet eller feiret du deg selv i dag?</label>
+                                        <textarea id="eval-reward" placeholder="F.eks. Oslo-tur med museum og god middag..." onchange="saveSundayEval()"></textarea>
+                                    </div>
+                                    
+                                    <div class="congrats-panel" id="congrats-finish-panel" style="display:none;">
+                                        <i class="fa-solid fa-trophy trophy-icon animate-bounce"></i>
+                                        <h3>DU HAR FULLFØRT HELVETESUKA!</h3>
+                                        <p>Du har kjempet, lidd, lært, og overlevd. Du har vist en viljestyrke langt over gjennomsnittet. Gå ut i hverdagen og fortsett å heve din standard!</p>
+                                        <button class="btn btn-primary" onclick="triggerConfetti()"><i class="fa-solid fa-sparkles"></i> Fyr av Konfetti igjen!</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Instructions / Explanation Modal -->
+    <div id="instructions-modal" class="modal">
+        <div class="modal-content glass-container">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-circle-info"></i> Om Helvetesuka</h2>
+                <button class="close-btn" onclick="closeInstructionsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h3>Bakgrunn</h3>
+                <p><strong>Erik Bertrand Larsen</strong>, en tidligere fallskjermjeger og siviløkonom, lanserte i 2013 boken <em>«Helvetesuka»</em>. Målet er å heve personlige standarder ved å bevise for seg selv hvor mye man kan yte når alt gjøres 100% optimalt i syv dager.</p>
+                
+                <h3>Slik gjør du det i vanlig jobb:</h3>
+                <p>Nøkkelen er å planlegge uken ekstremt nøye. Mandag til fredag gjennomfører du dine vanlige arbeidsoppgaver, men du kutter ut all tidslekkasje.</p>
+                <ul>
+                    <li><strong>Planlegg i forkant:</strong> Handle inn sunn mat for hele uken i helgen før. Informer familie og venner slik at de vet du blir mindre tilgjengelig og slukker lyset tidlig.</li>
+                    <li><strong>Morgenene er gull:</strong> Ved å stå opp klokken 05:00 får du 2–3 timer til trening, planlegging og refleksjon før arbeidsdagen starter.</li>
+                    <li><strong>Torsdagen:</strong> Etter vanlig arbeidstid torsdag og kveldsaktiviteter, starter nattarbeidet. Du skal rydde boder, snekre, vaske, arkivere eller jobbe hele natten. Fredag klokken 12:00 tar du en 20-minutters powernap for å klare fredags ettermiddag før du slukker lyset klokken 22:00.</li>
+                    <li><strong>Søndag belønning:</strong> En uke uten kontrast gir ikke lykkefølelse. Belønn deg selv på søndag med noe du virkelig har hatt lyst til!</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeInstructionsModal()">Forstått</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Canvas Confetti Script -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="index.js"></script>
+</body>
+</html>
