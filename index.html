@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Helvetesuka - Gjennomfør Bertrand Larsens ekstremuke</title>
     <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="manifest" href="manifest.json">
     
     <!-- Meta for dark mode & theme styling -->
     <meta name="color-scheme" content="light dark">
@@ -78,8 +79,23 @@
                 <span class="logo-text">HELVETESUKA</span>
             </div>
             
+            <!-- View Mode Toggles (Dashboard vs History) -->
+            <div class="header-tabs">
+                <button id="tab-dashboard-btn" class="header-tab-btn active" onclick="switchViewMode('dashboard')">
+                    <i class="fa-solid fa-gauge-high"></i> Dashboard
+                </button>
+                <button id="tab-history-btn" class="header-tab-btn" onclick="switchViewMode('history')">
+                    <i class="fa-solid fa-chart-line"></i> Historikk <span id="history-count-badge" class="tab-badge" style="display:none;">0</span>
+                </button>
+            </div>
+            
             <div class="header-controls">
-                <span id="week-progress-badge" class="badge">Ukeaktiv</span>
+                <button id="soundscape-panel-btn" class="icon-btn" onclick="toggleSoundscapePanel()" title="Lydbilde generator (Hvit støy, regn, binaural)">
+                    <i class="fa-solid fa-headphones"></i>
+                </button>
+                <button id="notifications-btn" class="icon-btn" onclick="requestNotificationPermission()" title="Varslingsinnstillinger">
+                    <i class="fa-solid fa-bell"></i>
+                </button>
                 <button id="theme-toggle" class="icon-btn" onclick="toggleColorScheme()" title="Endre fargetema">
                     <i class="fa-solid fa-circle-half-stroke"></i>
                 </button>
@@ -93,8 +109,42 @@
         </header>
 
         <div class="app-layout">
-            <!-- Timeline Navigation (Monday - Sunday) -->
-            <nav class="timeline-nav">
+            <!-- Floating Soundscape Panel (Dropdown drawer) -->
+            <div id="soundscape-drawer" class="soundscape-drawer glass-container">
+                <div class="drawer-header">
+                    <h4><i class="fa-solid fa-headphones"></i> Fokuslyder (Synthesizer)</h4>
+                    <button class="close-drawer-btn" onclick="toggleSoundscapePanel()">&times;</button>
+                </div>
+                <p class="drawer-intro">Fokuslyder genereres direkte av nettleseren via Web Audio API. Fungerer 100% offline uten eksterne musikkfiler!</p>
+                <div class="audio-controls-row">
+                    <div class="audio-item">
+                        <span>Hvit Støy (Konsentrasjon)</span>
+                        <div class="audio-btn-group">
+                            <button class="sound-control-btn" id="sound-white-play" onclick="toggleNoise('white')"><i class="fa-solid fa-play"></i> Spill</button>
+                            <input type="range" class="volume-slider" id="sound-white-volume" min="0" max="1" step="0.05" value="0.3" oninput="adjustVolume('white', this.value)">
+                        </div>
+                    </div>
+                    <div class="audio-item">
+                        <span>Regnlyd / Natur (Avspenning)</span>
+                        <div class="audio-btn-group">
+                            <button class="sound-control-btn" id="sound-rain-play" onclick="toggleNoise('rain')"><i class="fa-solid fa-play"></i> Spill</button>
+                            <input type="range" class="volume-slider" id="sound-rain-volume" min="0" max="1" step="0.05" value="0.3" oninput="adjustVolume('rain', this.value)">
+                        </div>
+                    </div>
+                    <div class="audio-item">
+                        <span>Binaural Beats (Alpha-modus)</span>
+                        <div class="audio-btn-group">
+                            <button class="sound-control-btn" id="sound-binaural-play" onclick="toggleNoise('binaural')"><i class="fa-solid fa-play"></i> Spill</button>
+                            <input type="range" class="volume-slider" id="sound-binaural-volume" min="0" max="1" step="0.05" value="0.3" oninput="adjustVolume('binaural', this.value)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Dashboard View -->
+            <div id="view-dashboard" class="view-section active">
+                <!-- Timeline Navigation (Monday - Sunday) -->
+                <nav class="timeline-nav">
                 <div class="timeline-container" style="grid-template-columns: repeat(8, 1fr);">
                     <button class="nav-day-btn" data-day="0" onclick="setActiveDay(0)">
                         <span class="day-abbr">PREP</span>
@@ -507,7 +557,11 @@
                                         <i class="fa-solid fa-trophy trophy-icon animate-bounce"></i>
                                         <h3>DU HAR FULLFØRT HELVETESUKA!</h3>
                                         <p>Du har kjempet, lidd, lært, og overlevd. Du har vist en viljestyrke langt over gjennomsnittet. Gå ut i hverdagen og fortsett å heve din standard!</p>
-                                        <button class="btn btn-primary" onclick="triggerConfetti()"><i class="fa-solid fa-sparkles"></i> Fyr av Konfetti igjen!</button>
+                                        <div class="powernap-buttons">
+                                            <button class="btn btn-primary" onclick="triggerConfetti()"><i class="fa-solid fa-sparkles"></i> Konfetti</button>
+                                            <button class="btn btn-accent" onclick="openShareModal()"><i class="fa-solid fa-share-nodes"></i> Del Resultat</button>
+                                            <button class="btn btn-secondary" onclick="archiveCurrentWeek()"><i class="fa-solid fa-box-archive"></i> Arkiver Uke</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -515,6 +569,68 @@
                     </div>
                 </div>
             </main>
+            </div> <!-- End of view-dashboard -->
+
+            <!-- History View (Hidden by default) -->
+            <div id="view-history" class="view-section">
+                <div class="glass-container section-card history-card">
+                    <div class="section-title">
+                        <i class="fa-solid fa-chart-line title-icon"></i>
+                        <h3>Din Helvetesuka Historikk</h3>
+                    </div>
+                    
+                    <div class="history-stats-overview">
+                        <div class="history-stat-box">
+                            <span class="value" id="stats-total-weeks">0</span>
+                            <span class="label">Uker fullført</span>
+                        </div>
+                        <div class="history-stat-box">
+                            <span class="value" id="stats-avg-progress">0%</span>
+                            <span class="label">Snittprogresjon</span>
+                        </div>
+                        <div class="history-stat-box">
+                            <span class="value" id="stats-total-checkpoints">0</span>
+                            <span class="label">All-nighter sjekkpunkter</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Chart -->
+                    <div class="chart-section" id="chart-section-wrapper" style="display:none;">
+                        <h4>Progresjon over tid:</h4>
+                        <div class="css-chart-container" id="history-chart-grid">
+                            <!-- Dynamically generated chart bars -->
+                        </div>
+                    </div>
+                    
+                    <!-- Archived Weeks List -->
+                    <div class="archived-weeks-section">
+                        <h4>Dine fullførte uker:</h4>
+                        <div id="history-weeks-list" class="history-weeks-list">
+                            <!-- Dynamic archived uke details -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="share-modal" class="modal">
+        <div class="modal-content glass-container" style="max-width: 480px;">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-share-nodes"></i> Del Dine Resultater</h2>
+                <button class="close-btn" onclick="closeShareModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="gap: 15px;">
+                <p>Kopier dette oppsummeringskortet og del det med venner, kolleger eller på sosiale medier for å feire fullføringen din!</p>
+                <div class="share-preview-card" id="share-preview-text" style="white-space: pre-line; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; font-family: monospace; font-size: 0.9rem; border: 1px solid var(--glass-border); line-height: 1.4;">
+                    <!-- Filled dynamically -->
+                </div>
+            </div>
+            <div class="modal-footer" style="gap: 10px;">
+                <button class="btn btn-secondary-outline" onclick="closeShareModal()">Avbryt</button>
+                <button class="btn btn-primary" onclick="copyShareText()"><i class="fa-solid fa-copy"></i> Kopier tekst</button>
+            </div>
         </div>
     </div>
 

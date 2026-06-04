@@ -1,0 +1,21 @@
+{
+  "short_name": "Helvetesuka",
+  "name": "Helvetesuka - Gjennomfør Bertrand Larsens Ekstremuke",
+  "icons": [
+    {
+      "src": "assets/favicon.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "assets/favicon.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "index.html",
+  "background_color": "#070913",
+  "theme_color": "#070913",
+  "display": "standalone",
+  "orientation": "portrait"
+}
