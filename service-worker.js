@@ -1,4 +1,4 @@
-const CACHE_NAME = 'helvetesuka-cache-v2';
+const CACHE_NAME = 'helvetesuka-cache-v3';
 const ASSETS = [
   'index.html',
   'index.css',

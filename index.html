@@ -90,9 +90,6 @@
             </div>
             
             <div class="header-controls">
-                <button id="soundscape-panel-btn" class="icon-btn" onclick="toggleSoundscapePanel()" title="Lydbilde generator (Hvit støy, regn, binaural)">
-                    <i class="fa-solid fa-headphones"></i>
-                </button>
                 <button id="notifications-btn" class="icon-btn" onclick="requestNotificationPermission()" title="Varslingsinnstillinger">
                     <i class="fa-solid fa-bell"></i>
                 </button>
@@ -109,38 +106,6 @@
         </header>
 
         <div class="app-layout">
-            <!-- Floating Soundscape Panel (Dropdown drawer) -->
-            <div id="soundscape-drawer" class="soundscape-drawer glass-container">
-                <div class="drawer-header">
-                    <h4><i class="fa-solid fa-headphones"></i> Fokuslyder (Synthesizer)</h4>
-                    <button class="close-drawer-btn" onclick="toggleSoundscapePanel()">&times;</button>
-                </div>
-                <p class="drawer-intro">Fokuslyder genereres direkte av nettleseren via Web Audio API. Fungerer 100% offline uten eksterne musikkfiler!</p>
-                <div class="audio-controls-row">
-                    <div class="audio-item">
-                        <span>Hvit Støy (Konsentrasjon)</span>
-                        <div class="audio-btn-group">
-                            <button class="sound-control-btn" id="sound-white-play" onclick="toggleNoise('white')"><i class="fa-solid fa-play"></i> Spill</button>
-                            <input type="range" class="volume-slider" id="sound-white-volume" min="0" max="1" step="0.05" value="0.3" oninput="adjustVolume('white', this.value)">
-                        </div>
-                    </div>
-                    <div class="audio-item">
-                        <span>Regnlyd / Natur (Avspenning)</span>
-                        <div class="audio-btn-group">
-                            <button class="sound-control-btn" id="sound-rain-play" onclick="toggleNoise('rain')"><i class="fa-solid fa-play"></i> Spill</button>
-                            <input type="range" class="volume-slider" id="sound-rain-volume" min="0" max="1" step="0.05" value="0.3" oninput="adjustVolume('rain', this.value)">
-                        </div>
-                    </div>
-                    <div class="audio-item">
-                        <span>Binaural Beats (Alpha-modus)</span>
-                        <div class="audio-btn-group">
-                            <button class="sound-control-btn" id="sound-binaural-play" onclick="toggleNoise('binaural')"><i class="fa-solid fa-play"></i> Spill</button>
-                            <input type="range" class="volume-slider" id="sound-binaural-volume" min="0" max="1" step="0.05" value="0.3" oninput="adjustVolume('binaural', this.value)">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Active Dashboard View -->
             <div id="view-dashboard" class="view-section active">
                 <!-- Timeline Navigation (Monday - Sunday) -->
